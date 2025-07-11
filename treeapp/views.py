@@ -3,6 +3,8 @@ from .models import Person, Marriage, Child
 from django import forms
 from datetime import date
 from django.urls import reverse
+from operator import itemgetter
+from itertools import groupby
 
 # ----- FORM -----
 class PersonForm(forms.ModelForm):
@@ -183,6 +185,17 @@ def person_detail(request, person_id):
     if child_record:
         siblings = Person.objects.filter(child__marriage=child_record.marriage).exclude(id=person.id)
 
+    flat = person.get_mahram_for_template()
+    # urut dulu supaya groupby berjalan
+    flat = sorted(flat, key=itemgetter('jenis_label'))
+    grouped = [
+        {
+          'jenis_label': jenis,
+          'categories': list(items)
+        }
+        for jenis, items in groupby(flat, key=itemgetter('jenis_label'))
+    ]
+
     context = {
         'person': person,
         'spouse': spouse,
@@ -191,6 +204,7 @@ def person_detail(request, person_id):
         'mother': mother,
         'siblings': siblings,
         'umur': umur,
+        'mahram_grouped': grouped,
         'current_page': f'Profil {person.name}',
     }
 

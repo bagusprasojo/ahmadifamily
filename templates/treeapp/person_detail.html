@@ -102,6 +102,28 @@
     </div>
   </div>
 
+  <div class="container mt-4">
+    <div class="card shadow-lg">    
+      <div class="card-body">
+        <h4 class="card-title">Mahram</h4>
+        {% for grp in mahram_grouped %}
+          <div>
+            <h5 class="text-lg font-bold">{{ grp.jenis_label }}</h5>
+            {% for cat in grp.categories %}
+              <h6 class="text-base font-medium">{{ cat.kategori_label }}</h6>
+              <ol class="list-disc list-inside mb-4">
+                {% for p in cat.persons %}
+                  <li><a href="{% url 'person_detail' p.id %}">{{ p.name }}</a></li>
+                {% endfor %}
+              </ol>
+            {% endfor %}
+          </div>
+        
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+
 </section>
 
 

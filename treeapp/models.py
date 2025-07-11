@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
 from ckeditor.fields import RichTextField
+from collections import defaultdict
 
 # models.py
 from django.db import models
@@ -65,6 +66,111 @@ class Person(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
     is_root = models.BooleanField(default=False)
+
+    def get_parents(self):
+        try:
+            child = self.child
+        except Child.DoesNotExist:
+            return []
+        m = child.marriage
+        return [m.husband, m.wife]
+
+    def get_children(self):
+        marriages = list(self.marriages_as_husband.all()) + \
+                    list(self.marriages_as_wife.all())
+        return [c.person for m in marriages for c in m.children.all()]
+
+    def get_spouses(self):
+        return [m.wife for m in self.marriages_as_husband.all()] + \
+               [m.husband for m in self.marriages_as_wife.all()]
+
+    def _traverse(self, sequence):
+        """
+        Jalankan sequence of relations, 
+        misal ['parent','child'] untuk mencari siblings.
+        """
+        funcs = {
+            'parent': Person.get_parents,
+            'child':  Person.get_children,
+            'spouse': Person.get_spouses,
+        }
+        results = [self]
+        for step in sequence:
+            next_gen = []
+            for p in results:
+                next_gen.extend(funcs[step](p))
+            results = next_gen
+        # buang duplikat & diri sendiri
+        return {p for p in results if p.pk != self.pk}
+
+    def get_mahram(self):
+        # mapping path → (kategori dalam BI, jenis hubungan)
+        mapping = {
+            ('parent',):               ('orang_tua',        'darah'),            
+            ('parent',)*2:             ('kakek_nenek',      'darah'),
+            ('parent',)*3:             ('buyut',            'darah'),            
+            ('child',):                ('anak',             'darah'),
+            ('child',)*2:              ('cucu',             'darah'),
+            ('child',)*3:              ('cicit',            'darah'),
+            ('parent','child'):        ('saudara',          'darah'),
+            ('child','parent'):        ('saudara',          'darah'),
+            ('parent','parent','child'): ('paman_bibi', 'darah'),
+            ('spouse',):               ('pasangan',         'perkawinan'),
+            ('spouse','parent'):       ('mertua',           'perkawinan'),
+            ('spouse','child'):        ('menantu',          'perkawinan'),
+            ('child','spouse'):        ('menantu',          'perkawinan'),
+        }
+
+        # kumpulkan hasil
+        result = {'darah': defaultdict(list),
+                  'perkawinan': defaultdict(list)}
+        for path, (kategori, jenis) in mapping.items():
+            orang = self._traverse(path)
+            if kategori == 'paman_bibi':
+                orang -= set(self.get_parents())
+            elif kategori == 'menantu':
+                orang -= set(self.get_children())
+            elif kategori == 'saudara':
+                orang -= {self, *self.get_spouses()}
+
+            result[jenis][kategori].extend(sorted(orang, key=lambda p: p.pk))
+        return result
+    
+    def get_mahram_for_template(self):
+        """
+        Mengubah output get_mahram() jadi list of dict dengan label BI
+        siap dirender di template.
+        """
+        raw = self.get_mahram()
+        LABEL_JENIS = {
+            'darah':      'Mahram karena Darah',
+            'perkawinan': 'Mahram karena Perkawinan',
+        }
+        LABEL_KAT = {
+            'orang_tua':   'Orang Tua',
+            'kakek_nenek': 'Kakek & Nenek',
+            'buyut':       'Buyut',
+            'anak':        'Anak',
+            'cucu':        'Cucu',
+            'cicit':       'Cicit',
+            'saudara':     'Saudara Kandung',
+            'paman_bibi':  'Paman & Bibi',
+            'pasangan':    'Pasangan',
+            'mertua':      'Mertua',
+            'menantu':     'Menantu',
+        }
+
+        display = []
+        for jenis, cats in raw.items():
+            for kat, people in cats.items():
+                if not people:
+                    continue
+                display.append({
+                    'jenis_label':    LABEL_JENIS[jenis],
+                    'kategori_label': LABEL_KAT[kat],
+                    'persons':        [{'id': p.pk, 'name': p.name} for p in people],
+                })
+        return display
 
     def __str__(self):
         return self.name
