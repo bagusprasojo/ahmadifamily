@@ -2,9 +2,11 @@ from django.db import models
 from django.utils.timezone import now
 from ckeditor.fields import RichTextField
 from collections import defaultdict
-
-# models.py
-from django.db import models
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.utils.text import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class AboutArticle(models.Model):
     title = models.CharField(max_length=255)
@@ -66,6 +68,13 @@ class Person(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
     is_root = models.BooleanField(default=False)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='person_profile'
+    )
 
     def get_parents(self):
         try:
@@ -189,3 +198,33 @@ class Child(models.Model):
 
     def __str__(self):
         return self.person.name
+
+
+def _generate_unique_username(full_name):
+    """
+    Build a slug-based username and make sure it is unique.
+    """
+    UserModel = get_user_model()
+    base_username = slugify(full_name) or 'person'
+    candidate = base_username
+    suffix = 1
+    while UserModel.objects.filter(username=candidate).exists():
+        suffix += 1
+        candidate = f"{base_username}{suffix}"
+    return candidate
+
+
+@receiver(post_save, sender=Person)
+def create_user_for_person(sender, instance, created, **kwargs):
+    """
+    Automatically create a Django auth user for every new Person so the
+    individual can log in later. Admins can set/reset passwords as needed.
+    """
+    if not created or instance.user_id:
+        return
+
+    UserModel = get_user_model()
+    username = _generate_unique_username(instance.name)
+    user = UserModel.objects.create_user(username=username)
+    instance.user = user
+    instance.save(update_fields=['user'])

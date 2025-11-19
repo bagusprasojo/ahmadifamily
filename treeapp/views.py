@@ -5,6 +5,7 @@ from datetime import date
 from django.urls import reverse
 from operator import itemgetter
 from itertools import groupby
+from django.contrib.auth.decorators import login_required
 
 # ----- FORM -----
 class PersonForm(forms.ModelForm):
@@ -124,6 +125,7 @@ def build_person_node(person):
 
 
 
+@login_required
 def family_tree(request, husband_id):
     persons = Person.objects.all().order_by('name')
     try:
@@ -210,3 +212,29 @@ def person_detail(request, person_id):
 
     return render(request, 'treeapp/person_detail.html', context)
 
+
+@login_required
+def user_profile(request):
+    person = getattr(request.user, 'person_profile', None)
+    if not person:
+        return render(request, 'treeapp/profile.html', {
+            'person': None,
+            'person_form': None,
+            'current_page': 'Profil Saya',
+            'profile_missing': True,
+        })
+
+    form = PersonForm(request.POST or None, instance=person, prefix='profile')
+    form_saved = False
+
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        form_saved = True
+
+    context = {
+        'person': person,
+        'person_form': form,
+        'form_saved': form_saved,
+        'current_page': f'Profil {person.name}',
+    }
+    return render(request, 'treeapp/profile.html', context)

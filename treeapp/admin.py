@@ -21,8 +21,9 @@ class ChildInline(admin.ModelAdmin):
     search_fields = ('person__name', 'marriage__husband__name', 'marriage__wife__name')
     
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ('name','gender','birth_date', 'created_at', 'updated_at', 'is_root')
+    list_display = ('name','gender','birth_date', 'user', 'created_at', 'updated_at', 'is_root')
     search_fields = ('name',)
+    readonly_fields = ('user',)
 
 class AppConfigAdmin(admin.ModelAdmin):
     list_display = ('name', 'value')
