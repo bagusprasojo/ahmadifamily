@@ -69,12 +69,19 @@
 
           <li><a href="{% url 'event_list' %}">Events</a></li>
           <li><a href="{% url 'gallery_list' %}">Gallery</a></li>
-          {% if user.is_authenticated %}
-            <li><a href="{% url 'profile' %}">Profil Saya</a></li>
-            <li><a href="{% url 'logout' %}">Logout ({{ user.get_username }})</a></li>
-          {% else %}
-            <li><a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Login</a></li>
-          {% endif %}
+          <li class="dropdown">
+            <a href="#"><span>Akun</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
+            <ul>
+              {% if user.is_authenticated %}
+                <li><a href="{% url 'profile' %}">Profil Saya</a></li>
+                <li><a href="{% url 'event_add' %}">Tambah Event</a></li>
+                <li><a href="{% url 'gallery_add' %}">Tambah Galeri</a></li>
+                <li><a href="{% url 'logout' %}">Logout ({{ user.get_username }})</a></li>
+              {% else %}
+                <li><a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Login</a></li>
+              {% endif %}
+            </ul>
+          </li>
           
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>

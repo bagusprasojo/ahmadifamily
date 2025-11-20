@@ -13,6 +13,15 @@
                     {% endif %}
                     <div class="card-body">
                         <h5 class="card-title">{{ gallery.title }}</h5>
+                        <p class="text-muted small mb-2">
+                            Oleh 
+                            {% if gallery.created_by %}
+                                {{ gallery.created_by.get_full_name|default:gallery.created_by.username }}
+                            {% else %}
+                                Admin
+                            {% endif %}
+                            &middot; {{ gallery.created_at|date:"d M Y H:i" }}
+                        </p>
                         <a href="{% url 'gallery_detail' gallery.pk %}" class="btn btn-primary">Lihat Detail</a>
                     </div>
                 </div>

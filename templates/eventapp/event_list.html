@@ -10,7 +10,16 @@
                 <img src="{{ event.images.first.image.url }}" class="card-img-top" alt="Gambar Event">
             {% endif %}
             <div class="card-body">
-                <h4 class="card-title"><h4><a href="{% url 'event_detail' event.pk %}">{{ event.title }}</a></h4></h4>
+                <h4 class="card-title"><a href="{% url 'event_detail' event.pk %}">{{ event.title }}</a></h4>
+                <p class="text-muted small">
+                    Oleh 
+                    {% if event.created_by %}
+                        {{ event.created_by.get_full_name|default:event.created_by.username }}
+                    {% else %}
+                        Admin
+                    {% endif %}
+                    &middot; {{ event.created_at|date:"d M Y H:i" }}
+                </p>
                 <div class="event-content">
                     {{ event.content|truncatewords_html:100|safe }} 
                     {% if event.content|length > 100 %}
@@ -28,7 +37,13 @@
                 </div>
             {% endif %}
             <div class="card-footer text-muted">
-                Diposting pada {{ event.created_at|date:"d M Y H:i" }}
+                Diposting oleh 
+                {% if event.created_by %}
+                    {{ event.created_by.get_full_name|default:event.created_by.username }}
+                {% else %}
+                    Admin
+                {% endif %}
+                pada {{ event.created_at|date:"d M Y H:i" }}
             </div>
         </div>
 
@@ -36,5 +51,3 @@
 </div>
 
 {% endblock %}
-
-}

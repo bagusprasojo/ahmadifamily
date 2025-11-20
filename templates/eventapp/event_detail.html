@@ -10,7 +10,15 @@
         <img src="{{ event.images.first.image.url }}" class="card-img-top" alt="Gambar Event">
     {% endif %}
 
-    <div class="mb-4 text-muted">Diposting pada {{ event.created_at|date:"d M Y H:i" }}</div>
+    <div class="mb-4 text-muted">
+        Diposting oleh 
+        {% if event.created_by %}
+            {{ event.created_by.get_full_name|default:event.created_by.username }}
+        {% else %}
+            Admin
+        {% endif %}
+        pada {{ event.created_at|date:"d M Y H:i" }}
+    </div>
 
     <div class="mb-4">
         {{ event.content|safe }}
@@ -24,6 +32,6 @@
         {% endfor %}
     </div>
 
-    <a href="{% url 'event_list' %}" class="btn btn-secondary mt-4">← Kembali ke Daftar Event</a>
+    <a href="{% url 'event_list' %}" class="btn btn-secondary mt-4">&laquo; Kembali ke Daftar Event</a>
 </div>
 {% endblock %}

@@ -4,6 +4,15 @@
 {% block content %}
 <div class="container my-4">
     <h2>{{ gallery.title }}</h2>
+    <p class="text-muted">
+        Oleh 
+        {% if gallery.created_by %}
+            {{ gallery.created_by.get_full_name|default:gallery.created_by.username }}
+        {% else %}
+            Admin
+        {% endif %}
+        pada {{ gallery.created_at|date:"d M Y H:i" }}
+    </p>
     <p>{{ gallery.description }}</p>
 
     {% if gallery.images.all %}
@@ -31,6 +40,6 @@
         <p>Belum ada gambar.</p>
     {% endif %}
 
-    <a href="{% url 'gallery_list' %}" class="btn btn-secondary mt-4">← Kembali ke Daftar Galeri</a>
+    <a href="{% url 'gallery_list' %}" class="btn btn-secondary mt-4">&laquo; Kembali ke Daftar Galeri</a>
 </div>
 {% endblock %}
