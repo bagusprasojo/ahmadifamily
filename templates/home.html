@@ -10,9 +10,10 @@
       <div id="hero-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
 
         {% for img in image_carousel %}
-        <div class="carousel-item active">
-          <img src="{{ img.image.url }}" alt="">
-        </div><!-- End Carousel Item -->
+        <div class="carousel-item{% if forloop.first %} active{% endif %}">
+          <img src="{{ img.image.url }}" class="d-block w-100" alt="{{ img.title|default:'Hero slide' }}">
+        </div>
+
         {% endfor %}
 
         <a class="carousel-control-prev" href="#hero-carousel" role="button" data-bs-slide="prev">
