@@ -2,6 +2,7 @@ from django import forms
 from .models import Event
 
 
+
 class MultiFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 

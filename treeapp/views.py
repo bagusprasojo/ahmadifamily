@@ -149,6 +149,7 @@ def family_tree(request, husband_id):
     }
     return render(request, 'treeapp/tree.html', context)
 
+@login_required
 def person_detail(request, person_id):
     person = get_object_or_404(Person, pk=person_id)
 
