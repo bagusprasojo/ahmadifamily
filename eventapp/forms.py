@@ -1,6 +1,6 @@
 from django import forms
 from .models import Event
-
+from ckeditor.widgets import CKEditorWidget
 
 
 class MultiFileInput(forms.ClearableFileInput):
@@ -22,14 +22,14 @@ class MultiFileField(forms.FileField):
 
 
 class EventForm(forms.ModelForm):
+    content = forms.CharField(widget=CKEditorWidget())
+
     class Meta:
         model = Event
         fields = ['title', 'content']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
         }
-
 
 class EventImageForm(forms.Form):
     images = MultiFileField(
