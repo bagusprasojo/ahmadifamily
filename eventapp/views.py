@@ -59,6 +59,7 @@ def event_create(request):
         'images_form': images_form,
         'current_page': 'Tambah Event',
         'is_edit': False,
+        'event': None,
     }
     return render(request, 'eventapp/event_form.html', context)
 
@@ -71,6 +72,9 @@ def event_update(request, pk):
         images_form = EventImageForm(request.POST, request.FILES)
         if form.is_valid() and images_form.is_valid():
             event = form.save()
+            delete_ids = request.POST.getlist('delete_images')
+            if delete_ids:
+                EventImage.objects.filter(id__in=delete_ids, event=event).delete()
             for image_file in request.FILES.getlist('images'):
                 EventImage.objects.create(event=event, image=image_file)
             return redirect('event_manage_list')

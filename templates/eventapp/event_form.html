@@ -30,14 +30,28 @@
                   {{ images_form.images.errors|join:", " }}
                 </div>
               {% endif %}
-              <small class="text-muted d-block mt-1">Anda dapat memilih lebih dari satu file.</small>
+              <small class="text-muted d-block mt-1">
+                {% if editing %}
+                  Pilih gambar baru jika ingin menambah ke event ini.
+                {% else %}
+                  Anda dapat memilih lebih dari satu file.
+                {% endif %}
+              </small>
             </div>
             {% if editing and event.images.all %}
-              <div class="mb-3">
-                <p class="mb-2 text-muted small">Gambar yang sudah ada:</p>
-                <div class="d-flex flex-wrap gap-2">
+              <div class="mb-4">
+                <p class="mb-2 text-muted small">Gambar yang sudah ada (centang untuk menghapus):</p>
+                <div class="row g-3">
                   {% for image in event.images.all %}
-                    <img src="{{ image.image.url }}" alt="Gambar Event" class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                    <div class="col-sm-6 col-md-4">
+                      <div class="border rounded p-2 h-100 text-center">
+                        <img src="{{ image.image.url }}" alt="Gambar Event" class="rounded mb-2" style="width: 100%; height: 140px; object-fit: cover;">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="delete_images" value="{{ image.id }}" id="delete-event-image-{{ image.id }}">
+                          <label class="form-check-label small" for="delete-event-image-{{ image.id }}">Hapus gambar ini</label>
+                        </div>
+                      </div>
+                    </div>
                   {% endfor %}
                 </div>
               </div>

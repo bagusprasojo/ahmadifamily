@@ -1,0 +1,55 @@
+{% extends "base_navigasi.html" %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 mb-0">Daftar Event Saya</h1>
+      <p class="text-muted mb-0">Kelola event yang sudah kamu buat.</p>
+    </div>
+    <a href="{% url 'event_add' %}" class="btn btn-primary">+ Tambah Event</a>
+  </div>
+
+  {% if events %}
+    <div class="table-responsive shadow-sm">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Judul</th>
+            <th scope="col">Ringkasan</th>
+            <th scope="col">Dibuat Pada</th>
+            <th scope="col" class="text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in events %}
+            <tr>
+              <td>
+                <a href="{% url 'event_detail' event.pk %}" class="fw-semibold text-decoration-none">
+                  {{ event.title }}
+                </a>
+              </td>
+              <td class="text-muted small">
+                {{ event.content|striptags|truncatewords:20 }}
+              </td>
+              <td>{{ event.created_at|date:"d M Y, H:i" }}</td>
+              <td class="text-center">
+                <a href="{% url 'event_edit' event.pk %}" class="btn btn-outline-secondary btn-sm me-1">Edit</a>
+                <form method="post" action="{% url 'event_delete' event.pk %}" class="d-inline" onsubmit="return confirm('Hapus event ini?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-danger btn-sm">Hapus</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <p class="text-muted mb-3">Belum ada event yang kamu buat.</p>
+      <a href="{% url 'event_add' %}" class="btn btn-primary">Buat Event Pertama</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

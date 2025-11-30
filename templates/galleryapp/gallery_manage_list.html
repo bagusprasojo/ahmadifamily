@@ -1,0 +1,56 @@
+{% extends "base_navigasi.html" %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 mb-0">Daftar Galeri Saya</h1>
+      <p class="text-muted mb-0">Kelola galeri yang sudah kamu bagikan.</p>
+    </div>
+    <a href="{% url 'gallery_add' %}" class="btn btn-primary">+ Tambah Galeri</a>
+  </div>
+
+  {% if galleries %}
+    <div class="table-responsive shadow-sm">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Judul</th>
+            <th scope="col">Deskripsi</th>
+            <th scope="col">Jumlah Foto</th>
+            <th scope="col">Dibuat Pada</th>
+            <th scope="col" class="text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for gallery in galleries %}
+            <tr>
+              <td>
+                <span class="fw-semibold">{{ gallery.title }}</span>
+              </td>
+              <td class="text-muted small">
+                {{ gallery.description|default:"-"|truncatewords:20 }}
+              </td>
+              <td>{{ gallery.images.count }}</td>
+              <td>{{ gallery.created_at|date:"d M Y, H:i" }}</td>
+              <td class="text-center">
+                <a href="{% url 'gallery_detail' gallery.pk %}" class="btn btn-outline-primary btn-sm me-1">Lihat</a>
+                <a href="{% url 'gallery_edit' gallery.pk %}" class="btn btn-outline-secondary btn-sm me-1">Edit</a>
+                <form method="post" action="{% url 'gallery_delete' gallery.pk %}" class="d-inline" onsubmit="return confirm('Hapus galeri ini?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-danger btn-sm">Hapus</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <p class="text-muted mb-3">Belum ada galeri yang kamu buat.</p>
+      <a href="{% url 'gallery_add' %}" class="btn btn-primary">Buat Galeri Pertama</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
