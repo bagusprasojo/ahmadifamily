@@ -6,7 +6,8 @@
     <div class="col-lg-8">
       <div class="card shadow-sm">
         <div class="card-body">
-          <h2 class="h4 mb-4">Tambah Event</h2>
+          {% with is_edit|default:False as editing %}
+          <h2 class="h4 mb-4">{{ editing|yesno:"Edit Event,Tambah Event" }}</h2>
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.media }}
@@ -31,11 +32,24 @@
               {% endif %}
               <small class="text-muted d-block mt-1">Anda dapat memilih lebih dari satu file.</small>
             </div>
+            {% if editing and event.images.all %}
+              <div class="mb-3">
+                <p class="mb-2 text-muted small">Gambar yang sudah ada:</p>
+                <div class="d-flex flex-wrap gap-2">
+                  {% for image in event.images.all %}
+                    <img src="{{ image.image.url }}" alt="Gambar Event" class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
             <div class="d-flex justify-content-between">
-              <a href="{% url 'event_list' %}" class="btn btn-outline-secondary">Batal</a>
-              <button type="submit" class="btn btn-primary">Simpan Event</button>
+              <a href="{% url 'event_manage_list' %}" class="btn btn-outline-secondary">Batal</a>
+              <button type="submit" class="btn btn-primary">
+                {{ editing|yesno:"Perbarui Event,Simpan Event" }}
+              </button>
             </div>
           </form>
+          {% endwith %}
         </div>
       </div>
     </div>

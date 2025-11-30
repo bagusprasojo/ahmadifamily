@@ -2,52 +2,44 @@
 {% load static %}
 
 {% block content %}
-
-<div class="container py-5">    
-    {% for event in events %}
-        <div class="card mb-4">
-            {% if event.images.all %}
-                <img src="{{ event.images.first.image.url }}" class="card-img-top" alt="Gambar Event">
+<div class="container py-5">
+  {% if events %}
+    <div class="row g-4">
+      {% for event in events %}
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100 shadow-sm">
+            {% if event.images.first %}
+              <img src="{{ event.images.first.image.url }}" class="card-img-top" alt="{{ event.title }}">
+            {% else %}
+              <div class="ratio ratio-16x9 bg-light d-flex align-items-center justify-content-center text-muted">
+                <span class="small">Tidak ada gambar</span>
+              </div>
             {% endif %}
-            <div class="card-body">
-                <h4 class="card-title"><a href="{% url 'event_detail' event.pk %}">{{ event.title }}</a></h4>
-                <p class="text-muted small">
-                    Oleh 
-                    {% if event.created_by %}
-                        {{ event.created_by.get_full_name|default:event.created_by.username }}
-                    {% else %}
-                        Admin
-                    {% endif %}
-                    &middot; {{ event.created_at|date:"d M Y H:i" }}
-                </p>
-                <div class="event-content">
-                    {{ event.content|truncatewords_html:100|safe }} 
-                    {% if event.content|length > 100 %}
-                        <a href="{% url 'event_detail' event.pk %}" class="btn btn-primary btn-sm">Baca Selengkapnya</a>
-                    {% endif %}
-                </div>
-            </div>
-            {% if event.images.all|length > 1 %}
-                <div class="row g-2 px-3 pb-3">
-                    {% for image in event.images.all|slice:"1:" %}
-                        <div class="col-md-4">
-                            <img src="{{ image.image.url }}" class="img-fluid rounded" alt="Gambar Event">
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-            <div class="card-footer text-muted">
-                Diposting oleh 
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ event.title }}</h5>
+              <p class="card-text text-muted small mb-2">
+                Oleh
                 {% if event.created_by %}
-                    {{ event.created_by.get_full_name|default:event.created_by.username }}
+                  {{ event.created_by.get_full_name|default:event.created_by.username }}
                 {% else %}
-                    Admin
+                  Admin
                 {% endif %}
-                pada {{ event.created_at|date:"d M Y H:i" }}
+                &middot; {{ event.created_at|date:"d M Y H:i" }}
+              </p>
+              <p class="card-text flex-grow-1">
+                {{ event.content|striptags|truncatewords:30 }}
+              </p>
+              <a href="{% url 'event_detail' event.pk %}" class="btn btn-outline-primary mt-3">Baca Selengkapnya</a>
             </div>
+          </div>
         </div>
-
-    {% endfor %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <h2 class="h4 mb-3">Belum ada event yang dipublikasikan.</h2>
+      <p class="text-muted">Silakan kembali lagi nanti untuk melihat update terbaru.</p>
+    </div>
+  {% endif %}
 </div>
-
 {% endblock %}
